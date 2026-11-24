@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="CreditCard.Api/CreditCard.Api.csproj" Id="1a81efd5-6c36-4557-9e7c-6000993f4ffb" />
+  <Project Path="eStoreJA/eStoreJA.csproj" Id="12b45d06-9486-4ffc-9057-ae5fdcd6c654" />
+  <Project Path="Shared.Contracts/Shared.Contracts.csproj" Id="15d98435-5763-4bf2-977e-22fa24f029d4" />
+  <Project Path="Shipping.Api/Shipping.Api.csproj" Id="59be460a-c4bc-4436-8ef0-faf69e9e6b5f" />
+</Solution>

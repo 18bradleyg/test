@@ -1,0 +1,285 @@
+﻿﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="eStoreJA.SiteMaster" %>
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%: Page.Title %> - eStoreJA</title>
+
+    <asp:PlaceHolder runat="server">
+        <%: Scripts.Render("~/bundles/modernizr") %>
+    </asp:PlaceHolder>
+    <webopt:bundlereference runat="server" path="~/Content/css" />
+    <%-- New logo icons (replaces the template favicon line) --%>
+    <link rel="icon" href="~/favicon.ico" runat="server" />
+    <link rel="apple-touch-icon" href="~/Images/estoreja-mark-512.png" runat="server" />
+
+    <%-- Brand fonts: DM Sans (body) + JetBrains Mono (small caps labels) --%>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..800;1,9..40,300..800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+</head>
+<%-- page-home: teal header on Home. BodyCssClass: set by a page (e.g. "page-dark" on About/Contact) --%>
+<body class="<%: ((NavState("~/") == "active" ? "page-home " : "") + BodyCssClass).Trim() %>">
+    <%-- Keyboard users can jump straight past the header --%>
+    <asp:PlaceHolder ID="phSkipLink" runat="server">
+        <a class="skip-link" href="#main-content">Skip to content</a>
+    </asp:PlaceHolder>
+
+    <form runat="server">
+        <asp:ScriptManager runat="server">
+            <Scripts>
+                <%--To learn more about bundling scripts in ScriptManager see https://go.microsoft.com/fwlink/?LinkID=301884 --%>
+                <%--Framework Scripts--%>
+                <asp:ScriptReference Name="MsAjaxBundle" />
+                <asp:ScriptReference Name="jquery" />
+                <asp:ScriptReference Name="WebForms.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebForms.js" />
+                <asp:ScriptReference Name="WebUIValidation.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebUIValidation.js" />
+                <asp:ScriptReference Name="MenuStandards.js" Assembly="System.Web" Path="~/Scripts/WebForms/MenuStandards.js" />
+                <asp:ScriptReference Name="GridView.js" Assembly="System.Web" Path="~/Scripts/WebForms/GridView.js" />
+                <asp:ScriptReference Name="DetailsView.js" Assembly="System.Web" Path="~/Scripts/WebForms/DetailsView.js" />
+                <asp:ScriptReference Name="TreeView.js" Assembly="System.Web" Path="~/Scripts/WebForms/TreeView.js" />
+                <asp:ScriptReference Name="WebParts.js" Assembly="System.Web" Path="~/Scripts/WebForms/WebParts.js" />
+                <asp:ScriptReference Name="Focus.js" Assembly="System.Web" Path="~/Scripts/WebForms/Focus.js" />
+                <asp:ScriptReference Name="WebFormsBundle" />
+                <%--Site Scripts--%>
+            </Scripts>
+        </asp:ScriptManager>
+
+        <%-- ===================== Header ===================== --%>
+        <%-- Hidden on form-only pages (Log in / Register, Forgot password) via ShowSiteChrome --%>
+        <asp:PlaceHolder ID="phHeader" runat="server">
+        <header class="site-header">
+            <div class="container site-header-inner">
+
+                <a class="site-logo" runat="server" href="~/" aria-label="eStoreJA &ndash; go to home page">
+                    <%-- Both logos are rendered; Site.css shows the white one on dark pages (.page-dark) --%>
+                    <img class="logo-dark" src="~/Images/estoreja-logo.png" runat="server" alt="eStoreJA" width="130" height="38" />
+                    <img class="logo-light" src="~/Images/estoreja-logo-white.png" runat="server" alt="eStoreJA" width="130" height="38" />
+                </a>
+
+                <%-- No text links in the bar: Shop is on the home carousel; Order history, Track a package
+                     and Admin (admins only) are in the account dropdown --%>
+
+                <div class="site-actions">
+                    <%-- Search: pink circle toggles the drop-down box (Scripts/site-nav.js); centred in the bar on desktop (Site.css) --%>
+                    <button type="button" class="search-toggle" data-bs-toggle="collapse" data-bs-target="#siteSearch"
+                        aria-controls="siteSearch" aria-expanded="false" aria-label="Search">
+                        <svg class="icon-search" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+                        <svg class="icon-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+
+                    <%-- Cart: navy badge with the item count (hidden when empty); the count is in the aria-label --%>
+                    <a class="cart-link" href="<%: ResolveUrl("~/Cart") %>" aria-label="<%: CartAriaLabel %>" <%= AriaCurrent("~/Cart") %>>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.2a1.5 1.5 0 0 0 1.5 1.2h8.6a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1" /><circle cx="9.5" cy="19.5" r="1.3" /><circle cx="17" cy="19.5" r="1.3" /></svg>
+                        <% if (CartCount > 0) { %><span class="cart-badge" aria-hidden="true"><%: CartCount > 99 ? "99+" : CartCount.ToString() %></span><% } %>
+                    </a>
+
+                    <asp:LoginView runat="server" ViewStateMode="Disabled">
+                        <AnonymousTemplate>
+                            <%-- Signed out: same silhouette button; the menu offers Log in / Register --%>
+                            <div class="dropdown">
+                                <button type="button" class="account-btn" data-bs-toggle="dropdown" aria-expanded="false"
+                                    aria-label="Account menu: log in or register">
+                                    <span class="avatar" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5" /><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" /></svg></span>
+                                    <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end account-menu">
+                                    <a class="dropdown-item" href="<%: ResolveUrl("~/Account/Login") %>">Log in</a>
+                                    <a class="dropdown-item" href="<%: ResolveUrl("~/Account/Login?mode=register") %>">Register</a>
+                                </div>
+                            </div>
+                        </AnonymousTemplate>
+                        <LoggedInTemplate>
+                            <div class="dropdown">
+                                <button type="button" class="account-btn" data-bs-toggle="dropdown" aria-expanded="false"
+                                    aria-label="Account menu for <%: FirstName %>">
+                                    <span class="avatar" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5" /><path d="M5 19.5c1.2-3.3 3.8-5 7-5s5.8 1.7 7 5" /></svg></span>
+                                    <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end account-menu">
+                                    <%-- Greeting by first name (no email anywhere in the menu) --%>
+                                    <div class="account-head">
+                                        <span class="account-initial" aria-hidden="true"><%: FirstInitial %></span>
+                                        <span><strong class="account-hi">Hi, <em><%: FirstName %></em></strong><small>Welcome back</small></span>
+                                    </div>
+                                    <a class="dropdown-item" href="<%: ResolveUrl("~/Account/Manage") %>">My account</a>
+                                    <a class="dropdown-item" href="<%: ResolveUrl("~/OrderHistory") %>">Order history</a>
+                                    <a class="dropdown-item" href="<%: ResolveUrl("~/TrackPackage") %>">Track a package</a>
+                                    <% if (IsAdmin) { %><a class="dropdown-item account-admin" href="<%: ResolveUrl("~/Admin/") %>">Admin</a><% } %>
+                                    <div class="dropdown-divider"></div>
+                                    <%-- OnLoggingOut must stay: it signs the user out of the Identity cookie (see Site.master.cs) --%>
+                                    <asp:LoginStatus runat="server" CssClass="dropdown-item account-logout" LogoutAction="Redirect"
+                                        LogoutText="Log out" LogoutPageUrl="~/" OnLoggingOut="Unnamed_LoggingOut" />
+                                </div>
+                            </div>
+                        </LoggedInTemplate>
+                    </asp:LoginView>
+
+                    <button type="button" class="menu-toggle d-lg-none" data-bs-toggle="collapse" data-bs-target="#siteMenu"
+                        aria-controls="siteMenu" aria-expanded="false" aria-label="Open menu">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+                    </button>
+                </div>
+
+                <%-- Search box: plain input + button (no nested <form>); site-nav.js sends it to Shop?q= --%>
+                <div class="collapse site-search" id="siteSearch" data-search-url="<%: ResolveUrl("~/Shop") %>">
+                    <div class="search-card">
+                        <div class="search-row">
+                            <label for="siteSearchInput" class="visually-hidden">Search products</label>
+                            <span class="search-field">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M20 20l-4.2-4.2" /></svg>
+                                <input type="search" id="siteSearchInput" maxlength="100" autocomplete="off"
+                                    placeholder="Search products, e.g. headphones, coffee, sneakers" />
+                            </span>
+                            <button type="button" class="search-submit" id="siteSearchGo">Search</button>
+                        </div>
+                        <div class="search-browse">
+                            <span class="mono-label">Browse</span>
+                            <asp:Repeater ID="rptSearchCategories" runat="server" ItemType="System.String" EnableViewState="false">
+                                <ItemTemplate><a class="chip" href="<%#: CategoryUrl(Item) %>"><%#: Item %></a></ItemTemplate>
+                            </asp:Repeater>
+                        </div>
+                    </div>
+                </div>
+
+                <%-- Mobile menu (below lg) --%>
+                <div class="collapse d-lg-none site-menu" id="siteMenu">
+                    <nav class="menu-card" aria-label="Main (mobile)">
+                        <a href="<%: ResolveUrl("~/Shop") %>">Shop by category</a>
+                        <asp:LoginView runat="server" ViewStateMode="Disabled">
+                            <AnonymousTemplate>
+                                <a href="<%: ResolveUrl("~/Account/Login") %>">Log in</a>
+                                <a href="<%: ResolveUrl("~/Account/Login?mode=register") %>">Register</a>
+                            </AnonymousTemplate>
+                            <LoggedInTemplate>
+                                <a href="<%: ResolveUrl("~/Account/Manage") %>">My account</a>
+                            </LoggedInTemplate>
+                        </asp:LoginView>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        </asp:PlaceHolder>
+
+        <div id="main-content" class="container body-content" tabindex="-1">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+
+        <%-- Add-to-cart toast (Shop / Home redirect back here after the POST). Hides itself after ~5 s with
+             CSS only (Site.css), pausing while hovered or focused. --%>
+        <% if (CartToast != null) { %>
+        <div class="cart-toast" role="status">
+            <p><% if (CartToast.Message != null) { %><%: CartToast.Message %><% } else { %><strong><%: CartToast.ProductName %></strong> added to your cart<% } %></p>
+            <a class="cart-toast-btn" href="<%: ResolveUrl("~/Cart") %>">View cart</a>
+        </div>
+        <% } %>
+
+        <%-- ===================== Footer ===================== --%>
+        <asp:PlaceHolder ID="phFooter" runat="server">
+        <footer class="site-footer">
+            <%-- Newsletter card overlaps the top of the navy footer --%>
+            <div class="container">
+                <section class="newsletter" aria-labelledby="newsTitle">
+                    <div>
+                        <h2 id="newsTitle">New arrivals, <em>first.</em></h2>
+                        <p>New products and restocks in your inbox. No spam, unsubscribe any time.</p>
+                    </div>
+                    <div class="newsletter-form" id="newsForm">
+                        <label for="newsEmail" class="visually-hidden">Email address</label>
+                        <input type="email" id="newsEmail" placeholder="you@example.com" autocomplete="email" maxlength="256" />
+                        <button type="button" id="newsGo">Subscribe</button>
+                        <p class="newsletter-error" id="newsError" role="alert" hidden>Please enter a valid email address.</p>
+                    </div>
+                    <p class="newsletter-done" id="newsDone" role="status" hidden>You&rsquo;re on the list. Thanks!</p>
+                </section>
+            </div>
+
+            <div class="footer-navy">
+                <div class="container">
+                    <div class="footer-grid">
+                        <div class="footer-brand">
+                            <a runat="server" href="~/" aria-label="eStoreJA &ndash; go to home page">
+                                <img src="~/Images/estoreja-logo-white.png" runat="server" alt="eStoreJA" width="137" height="40" />
+                            </a>
+                            <p>Everyday goods from Kingston, paid for securely by card and shipped with a tracking number on every order.</p>
+                            <p class="footer-contact">
+                                <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg>Kingston, Jamaica</span>
+                                <a href="mailto:support@estoreja.com"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" /></svg>support@estoreja.com</a>
+                            </p>
+                            <div class="footer-social">
+                                <%-- TODO: real social links --%>
+                                <a href="#" aria-label="eStoreJA on Instagram">Instagram</a>
+                                <a href="#" aria-label="eStoreJA on Facebook">Facebook</a>
+                                <a href="#" aria-label="eStoreJA on TikTok">TikTok</a>
+                            </div>
+                        </div>
+
+                        <nav aria-label="Shop">
+                            <h2>Shop</h2>
+                            <asp:Repeater ID="rptFooterCategories" runat="server" ItemType="System.String" EnableViewState="false">
+                                <ItemTemplate><a href="<%#: CategoryUrl(Item) %>"><%#: Item %></a></ItemTemplate>
+                            </asp:Repeater>
+                        </nav>
+
+                        <nav aria-label="Your account">
+                            <h2>Your account</h2>
+                            <%-- Guests: straight to the Log in / Register card (same links as the account menu).
+                                 Signed in: Login would just bounce back to Home, so link to My account instead. --%>
+                            <% if (Context.User.Identity.IsAuthenticated) { %>
+                            <a href="<%: ResolveUrl("~/Account/Manage") %>">My account</a>
+                            <% } else { %>
+                            <a href="<%: ResolveUrl("~/Account/Login") %>">Sign in</a>
+                            <a href="<%: ResolveUrl("~/Account/Login?mode=register") %>">Create account</a>
+                            <% } %>
+                            <a href="<%: ResolveUrl("~/OrderHistory") %>">Order history</a>
+                            <a href="<%: ResolveUrl("~/TrackPackage") %>">Track a package</a>
+                        </nav>
+
+                        <nav aria-label="Help">
+                            <h2>Help</h2>
+                            <a href="<%: ResolveUrl("~/Contact") %>">Contact us</a>
+                            <a href="#">Shipping &amp; delivery</a><!-- TODO: page -->
+                            <a href="#">Returns &amp; refunds</a><!-- TODO: page -->
+                            <a href="#">Payment options</a><!-- TODO: page -->
+                            <a href="#">FAQs</a><!-- TODO: page -->
+                        </nav>
+
+                        <nav aria-label="Company">
+                            <h2>Company</h2>
+                            <a href="<%: ResolveUrl("~/About") %>">About eStoreJA</a>
+                            <a href="#">Careers</a><!-- TODO: page -->
+                            <a href="#">Store locations</a><!-- TODO: page -->
+                            <a href="#">Sell with us</a><!-- TODO: page -->
+                        </nav>
+                    </div>
+
+                    <div class="footer-bottom">
+                        <span>&copy; <%: DateTime.Now.Year %> eStoreJA. All rights reserved.</span>
+                        <nav class="footer-legal" aria-label="Legal">
+                            <a href="#">Privacy Policy</a><!-- TODO: page -->
+                            <a href="#">Terms of Service</a><!-- TODO: page -->
+                            <a href="#">Cookie Policy</a><!-- TODO: page -->
+                            <a href="#">Refund Policy</a><!-- TODO: page -->
+                            <a href="#">Accessibility</a><!-- TODO: page -->
+                        </nav>
+                        <span class="footer-secure">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+                            Secure card payments
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        </asp:PlaceHolder>
+    </form>
+    <asp:PlaceHolder runat="server">
+        <%-- Bundle = Bootstrap + Popper (the Shop and account dropdowns need Popper) --%>
+        <%: Scripts.Render("~/Scripts/bootstrap.bundle.js") %>
+        <%: Scripts.Render("~/Scripts/site-nav.js") %>
+    </asp:PlaceHolder>
+</body>
+</html>
